@@ -28,8 +28,8 @@ nft add rule nat REDSOCKS ip protocol tcp ip daddr 127.0.0.1 counter return
 
 # set proxy setting for ALL other IPs
 
-nft add rule nat REDSOCKS prerouting tcp  dnat to SED_PROXY_PORT
-nft add rule nat REDSOCKS prerouting icmp dnat to SED_PROXY_PORT
+nft add rule nat REDSOCKS tcp  dnat to SED_PROXY_PORT
+nft add rule nat REDSOCKS icmp dnat to SED_PROXY_PORT
 
 echo -e "\033[32m your iptabls REDSOCKS chain like this.... \033[0m"
 nft list table nat
