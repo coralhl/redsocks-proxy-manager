@@ -1,0 +1,11 @@
+#!/bin/bash
+# Перезапуск прокси (для применения новых записей в ToProxy.list)
+
+iptables -t nat -D OUTPUT -p tcp -j REDSOCKS
+iptables -t nat -D PREROUTING -p tcp -j REDSOCKS
+iptables -t nat -F REDSOCKS
+iptables -t nat -X REDSOCKS
+iptables -t nat -nvxL OUTPUT --line
+iptables -t nat -nvxL REDSOCKS --line
+
+rs-proxy

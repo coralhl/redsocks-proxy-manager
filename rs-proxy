@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# add firewall chains
+iptables -t nat -N REDSOCKS
+iptables -t nat -A PREROUTING -p tcp -j REDSOCKS
+iptables -t nat -A OUTPUT -p tcp -j REDSOCKS
+
+# set no proxy setting for local traffic and blacklisted IPs
+function set_no_proxy() {
+    # set no need proxy
+    while read line; do
+        echo -e "\033[32m this ip[${line}] will no connected .... \033[0m"
+        iptables -t nat -A REDSOCKS -p tcp -d ${line} -j RETURN
+    done </etc/redsocks/NoProxy.list
+}
+
+set_no_proxy
+
+for subroute in $(ip route show | grep "/" | awk '{print $1}'); do
+    iptables -t nat -A REDSOCKS -p tcp -d ${subroute} -j RETURN
+done
+
+iptables -t nat -A REDSOCKS -p tcp -d SED_SOCKS5_SERVER -j RETURN
+iptables -t nat -A REDSOCKS -p tcp -d 127.0.0.1 -j RETURN
+
+# set proxy setting for whitelisted IPs
+while read line; do
+    echo -e "\033[32m this ip[${line}] will use proxy connected .... \033[0m"
+    iptables -t nat -A REDSOCKS -p tcp  -d ${line} -j REDIRECT --to-port SED_PROXY_PORT
+    iptables -t nat -A REDSOCKS -p icmp -d ${line} -j REDIRECT --to-port SED_PROXY_PORT
+done < <(grep -v "^###" /etc/redsocks/ToProxy.list)
+
+echo -e "\033[32m your iptabls REDSOCKS chain like this.... \033[0m"
+iptables -t nat -nvxL REDSOCKS --line-numbers

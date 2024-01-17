@@ -1,0 +1,109 @@
+#!/bin/bash
+in_file=/etc/redsocks/ToProxy.list
+
+print_usage() {
+    echo ""
+    echo "NAME"
+    echo "    rs-manage-ip -- add or remove IPs by host name in a file ToProxy.list"
+    echo "SYNOPSIS"
+    echo "    rs-manage-ip [-a|-d] <host name>"
+    echo "DESCRIPTION"
+    echo "    The following options are available:"
+    echo "    -a    Adds IPs by given hostname"
+    echo "    -d    Removes IP by given hostname"
+    echo ""
+    exit 1
+}
+
+function exist_add_ip {
+    ip_list="$(host $1 | awk '/has address/ { print $4 }')"
+    for ip in $ip_list; do
+        ip_exists=$(sed -n "$line_num1,$line_num3 p" $in_file | grep -w $ip)
+        if [ "$ip_exists" == "" ]; then
+            sed -i "$(($line_num1 + 1)) i $ip" $in_file
+            echo "IP $ip for domain $1 is added to file $in_file"
+        else
+            echo "IP $ip for domain $1 is present in file $in_file"
+        fi
+    done
+    echo "Done"
+}
+
+function new_add_ip {
+    ip_list="$(host $1 | awk '/has address/ { print $4 }')"
+    echo "### $1" >> $in_file
+    for ip in $ip_list; do
+        echo $ip >> $in_file
+    done
+    echo "Done. IPs $ip_list for domain $1 is added to file $in_file"
+}
+
+function add_host_name {
+    line_num1="$(grep -n "^### $1" $in_file | head -n 1 | cut -d: -f1)"
+    if [ "$line_num1" == "" ]; then
+        echo "Adding IPs for new domain $1"
+        new_add_ip $1
+    else
+        echo "Adding IPs for existing domain $1"
+        line_num2="$(tail -n +$(($line_num1 + 1)) $in_file | grep -n "^### " | head -n 1 | cut -d: -f1)"
+        if [ "$line_num2" == "" ]; then
+            line_num2="$(sed -n '$=' $in_file)"
+        fi
+        line_num3=$(($line_num1 + $line_num2))
+        exist_add_ip $1
+    fi
+}
+
+function exist_del_ip {
+    cleaned_list="$(sed -e "$line_num1,$line_num3 d" $in_file)"
+    echo "$cleaned_list" > $in_file
+
+}
+
+function del_host_name {
+    line_num1="$(grep -n "^### $1" $in_file | head -n 1 | cut -d: -f1)"
+    if [ "$line_num1" == "" ]; then
+        echo "Domain $1 is not found in file $in_file"
+    else
+        echo "Domain $1 is deleted"
+        line_num2="$(tail -n +$(($line_num1 + 1)) $in_file | grep -n "^### " | head -n 1 | cut -d: -f1)"
+        if [ "$line_num2" == "" ]; then
+            line_num2="$(sed -n '$=' $in_file)"
+        fi
+        line_num3=$(($line_num1 + $line_num2 - 1))
+        exist_del_ip $1
+    fi
+}
+
+function parse_param()
+{
+    if [ -z "$1" ];then
+        echo "Empty list of options" >&2
+        print_usage
+        exit 1
+    fi
+    while getopts "a:d:" opt; do
+        case $opt in
+        a)
+            host_name=${OPTARG}
+            add_host_name $host_name
+            /usr/local/bin/rs-restart
+            ;;
+        d)
+            host_name=${OPTARG}
+            del_host_name $host_name
+            /usr/local/bin/rs-restart
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument (getopts)" >&2
+            exit 1
+            ;;
+        esac
+    done
+}
+
+parse_param "$@"
