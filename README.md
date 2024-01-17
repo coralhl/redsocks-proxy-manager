@@ -29,7 +29,7 @@ please tell me you socks_port: 10808        # Введите порт прокс
 2. Запуск redsocks:
 
 ```bash
-Shell > sudo service redsocks start
+Shell> sudo service redsocks start
 
 ```
 
