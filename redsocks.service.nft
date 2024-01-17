@@ -1,0 +1,19 @@
+[Unit]
+Description=Transparent redirector of any TCP connection to proxy using your firewall
+
+[Service]
+Type=forking
+PIDFile=/tmp/redsocks.pid
+EnvironmentFile=/etc/redsocks/redsocksenv
+User=root
+ExecStart=/usr/bin/redsocks -c /etc/redsocks/redsocks.conf -p /tmp/redsocks.pid
+ExecStopPost=/bin/bash -c 'rm /tmp/redsocks.pid \
+    && nft delete rule ip nat OUTPUT ip protocol tcp counter jump REDSOCKS \
+	&& nft delete rule ip nat PREROUTING ip protocol tcp counter jump REDSOCKS \
+	&& nft flush chain ip nat REDSOCKS \
+	&& nft delete chain ip nat REDSOCKS \
+	&& nft list table ip nat'
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
