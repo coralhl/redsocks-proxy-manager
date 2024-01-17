@@ -3,7 +3,7 @@
 # add firewall chains
 nft add table nat
 nft add chain ip nat REDSOCKS
-nft add chain ip nat prerouting { type nat hook prerouting priority -100; }
+nft 'add chain ip nat prerouting { type nat hook prerouting priority -100; }'
 nft add rule ip nat prerouting ip protocol tcp counter jump REDSOCKS
 nft add rule ip nat OUTPUT ip protocol tcp counter jump REDSOCKS
 
