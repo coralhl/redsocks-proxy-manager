@@ -55,13 +55,13 @@ update_redsocks_conf
 # Проверка типа текущей системы инициализации
 if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
     # systemd
-    cp redsocks.service /etc/systemd/system/
+    cp redsocks.service.ntf /etc/systemd/system/
     systemctl daemon-reload
     systemctl enable redsocks.service
     systemctl start redsocks.service
 else
     # SysV init
-    cp redsocks-service /etc/init.d/redsocks
+    cp redsocks-service.ntf /etc/init.d/redsocks
     chmod +x /etc/init.d/redsocks
     service redsocks start
 fi
@@ -71,7 +71,7 @@ cp NoProxy.list /etc/redsocks/NoProxy.list
 cp ToProxy.list /etc/redsocks/ToProxy.list
 
 # Копирование скрипта прокси-сервера
-cp -rf rs-proxy.nft /usr/local/bin/rs-proxy && chmod +x /usr/local/bin/rs-proxy && sed -i 's/SED_SOCKS5_SERVER/'${SOCKS5_SERVER}'/g' /usr/local/bin/rs-proxy && sed -i 's/SED_PROXY_PORT/'${PROXY_PORT}'/g' /usr/local/bin/rs-proxy
-cp -rf rs-proxyall.nft /usr/local/bin/rs-proxyall && chmod +x /usr/local/bin/rs-proxyall && sed -i 's/SED_SOCKS5_SERVER/'${SOCKS5_SERVER}'/g' /usr/local/bin/rs-proxyall && sed -i 's/SED_PROXY_PORT/'${PROXY_PORT}'/g' /usr/local/bin/rs-proxyall
-cp -rf rs-restart.nft /usr/local/bin/rs-restart && chmod +x /usr/local/bin/rs-restart
+cp -rf rs-proxy.ntf /usr/local/bin/rs-proxy && chmod +x /usr/local/bin/rs-proxy && sed -i 's/SED_SOCKS5_SERVER/'${SOCKS5_SERVER}'/g' /usr/local/bin/rs-proxy && sed -i 's/SED_PROXY_PORT/'${PROXY_PORT}'/g' /usr/local/bin/rs-proxy
+cp -rf rs-proxyall.ntf /usr/local/bin/rs-proxyall && chmod +x /usr/local/bin/rs-proxyall && sed -i 's/SED_SOCKS5_SERVER/'${SOCKS5_SERVER}'/g' /usr/local/bin/rs-proxyall && sed -i 's/SED_PROXY_PORT/'${PROXY_PORT}'/g' /usr/local/bin/rs-proxyall
+cp -rf rs-restart.ntf /usr/local/bin/rs-restart && chmod +x /usr/local/bin/rs-restart
 cp -rf rs-manage-ip /usr/local/bin/rs-manage-ip && chmod +x /usr/local/bin/rs-manage-ip
