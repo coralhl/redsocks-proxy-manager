@@ -23,8 +23,8 @@ for subroute in $(ip route show | grep "/" | awk '{print $1}'); do
     nft add rule nat REDSOCKS ip protocol tcp ip daddr ${subroute} counter return
 done
 
-nft add rule nat REDSOCKS ip protocol tcp ip daddr SED_SOCKS5_SERVER counter return
-nft add rule nat REDSOCKS ip protocol tcp ip daddr 127.0.0.1 counter return
+nft add rule nat REDSOCKS ip protocol tcp daddr SED_SOCKS5_SERVER counter return
+nft add rule nat REDSOCKS ip protocol tcp daddr 127.0.0.1 counter return
 
 # set proxy setting for ALL other IPs
 

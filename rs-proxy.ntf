@@ -23,14 +23,14 @@ for subroute in $(ip route show | grep "/" | awk '{print $1}'); do
     nft add rule nat REDSOCKS ip protocol tcp ip daddr ${subroute} counter return
 done
 
-nft add rule nat REDSOCKS ip protocol tcp ip daddr SED_SOCKS5_SERVER counter return
+nft add rule nat REDSOCKS ip protocol tcp daddr SED_SOCKS5_SERVER counter return
 nft add rule nat REDSOCKS ip protocol tcp ip daddr 127.0.0.1 counter return
 
 # set proxy setting for whitelisted IPs
 while read line; do
     echo -e "\033[32m this ip[${line}] will use proxy connected .... \033[0m"
-    nft add rule nat REDSOCKS tcp  ip daddr ${line} dnat to SED_PROXY_PORT
-    nft add rule nat REDSOCKS icmp ip daddr ${line} dnat to SED_PROXY_PORT
+    nft add rule nat REDSOCKS tcp  daddr ${line} dnat to SED_PROXY_PORT
+    nft add rule nat REDSOCKS icmp daddr ${line} dnat to SED_PROXY_PORT
 done < <(grep -v "^###" /etc/redsocks/ToProxy.list)
 
 echo -e "\033[32m your iptabls REDSOCKS chain like this.... \033[0m"
