@@ -36,9 +36,11 @@ case "$1" in
   stop)
     echo "Stopping redsocks..."
     # Remove iptables rule and stop redsocks
-    nft delete rule ip nat OUTPUT ip protocol tcp counter jump REDSOCKS
-    nft delete rule ip nat PREROUTING ip protocol tcp counter jump REDSOCKS
-	  nft flush chain ip nat REDSOCKS
+    nft delete rule nat OUTPUT ip protocol tcp counter jump REDSOCKS
+    nft delete rule nat PREROUTING ip protocol tcp counter jump REDSOCKS
+	  nft flush chain nat REDSOCKS
+    nft flush chain nat OUTPUT
+    nft flush chain nat prerouting
     [ -f "$PIDFILE" ] && kill -TERM $(cat "$PIDFILE")
     [ -f "$PIDFILE" ] && rm -f "$PIDFILE"
     ;;

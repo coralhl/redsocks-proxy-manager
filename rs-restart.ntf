@@ -1,10 +1,14 @@
 #!/bin/bash
 # Перезапуск прокси (для применения новых записей в ToProxy.list)
 
-nft delete rule ip nat OUTPUT ip protocol tcp counter jump REDSOCKS
-nft delete rule ip nat PREROUTING ip protocol tcp counter jump REDSOCKS
-nft flush chain ip nat REDSOCKS
-nft delete chain ip nat REDSOCKS
-nft list table ip nat
+nft delete rule nat OUTPUT ip protocol tcp counter jump REDSOCKS
+nft delete rule nat PREROUTING ip protocol tcp counter jump REDSOCKS
+nft flush chain nat REDSOCKS
+nft delete chain nat REDSOCKS
+nft flush chain nat OUTPUT
+nft delete chain nat OUTPUT
+nft flush chain nat prerouting
+nft delete chain nat prerouting
+nft list table nat
 
 rs-proxy

@@ -12,7 +12,13 @@ ExecStopPost=/bin/bash -c 'rm /tmp/redsocks.pid \
 	&& nft delete rule ip nat PREROUTING ip protocol tcp counter jump REDSOCKS \
 	&& nft flush chain ip nat REDSOCKS \
 	&& nft delete chain ip nat REDSOCKS \
+	&& nft flush chain nat OUTPUT \
+    && nft delete chain nat OUTPUT \
+    && nft flush chain nat prerouting \
+    && nft delete chain nat prerouting \
 	&& nft list table ip nat'
+
+
 Restart=on-abort
 
 [Install]
