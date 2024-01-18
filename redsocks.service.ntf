@@ -8,16 +8,13 @@ EnvironmentFile=/etc/redsocks/redsocksenv
 User=root
 ExecStart=/usr/bin/redsocks -c /etc/redsocks/redsocks.conf -p /tmp/redsocks.pid
 ExecStopPost=/bin/bash -c 'rm /tmp/redsocks.pid \
-    && nft delete rule ip nat OUTPUT ip protocol tcp counter jump REDSOCKS \
-	&& nft delete rule ip nat PREROUTING ip protocol tcp counter jump REDSOCKS \
-	&& nft flush chain ip nat REDSOCKS \
-	&& nft delete chain ip nat REDSOCKS \
-	&& nft flush chain nat OUTPUT \
-    && nft delete chain nat OUTPUT \
-    && nft flush chain nat prerouting \
+    && nft flush chain nat redsocks \
+	&& nft delete chain nat redsocks \
+	&& nft flush chain nat output \
+	&& nft delete chain nat output \
+	&& nft flush chain nat prerouting \
     && nft delete chain nat prerouting \
-	&& nft list table ip nat'
-
+	&& nft list table nat'
 
 Restart=on-abort
 

@@ -55,7 +55,7 @@ update_redsocks_conf
 # Проверка типа текущей системы инициализации
 if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
     # systemd
-    cp redsocks.service.ntf /etc/systemd/system/
+    cp redsocks.service.ntf /etc/systemd/system/redsocks.service
     systemctl daemon-reload
     systemctl enable redsocks.service
     systemctl start redsocks.service

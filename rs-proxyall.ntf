@@ -2,34 +2,33 @@
 
 # add firewall chains
 nft add table nat
-nft add chain nat REDSOCKS
-nft add chain nat OUTPUT
+nft add chain nat redsocks
+nft 'add chain nat output { type nat hook output priority -1; }'
+nft 'add rule nat output ip protocol tcp counter jump redsocks'
 nft 'add chain nat prerouting { type nat hook prerouting priority -100; }'
-nft add rule nat prerouting ip protocol tcp counter jump REDSOCKS
-nft add rule nat OUTPUT ip protocol tcp counter jump REDSOCKS
+nft 'add rule nat prerouting ip protocol tcp counter jump redsocks'
 
 # set no proxy setting for local traffic and blacklisted IPs
 function set_no_proxy() {
     # set no need proxy
     while read line; do
         echo -e "\033[32m this ip[${line}] will no connected .... \033[0m"
-        nft add rule nat REDSOCKS ip protocol tcp ip daddr ${line} counter return
+        nft add rule nat redsocks ip protocol tcp ip daddr ${line} counter return
     done </etc/redsocks/NoProxy.list
 }
 
 set_no_proxy
 
 for subroute in $(ip route show | grep "/" | awk '{print $1}'); do
-    nft add rule nat REDSOCKS ip protocol tcp ip daddr ${subroute} counter return
+    nft add rule nat redsocks ip protocol tcp ip daddr ${subroute} counter return
 done
 
-nft add rule nat REDSOCKS ip protocol tcp daddr SED_SOCKS5_SERVER counter return
-nft add rule nat REDSOCKS ip protocol tcp daddr 127.0.0.1 counter return
+nft add rule nat redsocks ip protocol tcp ip daddr SED_SOCKS5_SERVER counter return
+nft add rule nat redsocks ip protocol tcp ip daddr 127.0.0.1 counter return
 
 # set proxy setting for ALL other IPs
-
-nft add rule nat REDSOCKS tcp  dnat to SED_PROXY_PORT
-nft add rule nat REDSOCKS icmp dnat to SED_PROXY_PORT
+nft add rule nat redsocks ip protocol tcp  redirect to SED_PROXY_PORT
+nft add rule nat redsocks ip protocol icmp redirect to SED_PROXY_PORT
 
 echo -e "\033[32m your iptabls REDSOCKS chain like this.... \033[0m"
 nft list table nat
